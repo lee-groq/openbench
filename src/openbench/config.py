@@ -907,6 +907,21 @@ BENCHMARKS = {
         function_name="mmmu_pro_vision",
         is_alpha=False,
     ),
+    "arc_agi": BenchmarkMetadata(
+        name="ARC-AGI",
+        description="Abstraction and Reasoning Corpus for Artificial General Intelligence",
+        category="core",
+        tags=[
+            "reasoning",
+            "pattern-recognition",
+            "abstract-reasoning",
+            "visual",
+            "logic",
+            "agi",
+        ],
+        module_path="openbench.evals.arc_agi",
+        function_name="arc_agi",
+    ),
 }
 
 
