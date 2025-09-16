@@ -5,6 +5,7 @@ import time
 import typer
 from inspect_ai import eval
 from inspect_ai.model import Model
+from inspect_ai.log import EvalLog
 
 from openbench.config import load_task
 from openbench.monkeypatch.display_results_patch import patch_display_results
@@ -325,7 +326,7 @@ def run_eval(
             envvar="BENCH_ALPHA",
         ),
     ] = False,
-) -> None:
+) -> List[EvalLog] | None:
     """
     Run a benchmark on a model.
     """
@@ -379,7 +380,7 @@ def run_eval(
     start_time = time.time()
 
     try:
-        eval(
+        eval_logs = eval(
             tasks=tasks,
             model=model,
             max_connections=max_connections,
@@ -418,6 +419,7 @@ def run_eval(
                 hub_repo=hub_repo,
                 hub_private=hub_private,
             )
+        return eval_logs
     except Exception as e:
         if debug:
             # In debug mode, let the full stack trace show
