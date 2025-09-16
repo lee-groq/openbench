@@ -1,7 +1,7 @@
 """
 Monkey patch for inspect_ai display results to customize evaluation display.
 
-Adds task duration metrics (average, p95, p50) to the evaluation results display
+Adds sample duration metrics (average, p95, p50) to the evaluation results display
 by reading sample timing data from the evaluation log.
 
 Usage:
@@ -103,7 +103,7 @@ def patch_display_results():
             # Empty row for spacing
             table.add_row()
 
-            # Calculate task duration metrics from log
+            # Calculate sample duration metrics from log
             avg_duration_str = "N/A"
             p95_str = "N/A"
             p50_str = "N/A"
@@ -137,19 +137,19 @@ def patch_display_results():
                     # If we can't read timing data, use defaults
                     pass
 
-            # Add task duration metrics section
+            # Add sample duration metrics section
             table.add_row(
-                Text("average task duration:", style="bold"),
+                Text("average sample duration:", style="bold"),
                 f"  {avg_duration_str}",
                 style=theme.light,
             )
             table.add_row(
-                Text("p95 task duration:", style="bold"),
+                Text("p95 sample duration:", style="bold"),
                 f"  {p95_str}",
                 style=theme.light,
             )
             table.add_row(
-                Text("p50 task duration:", style="bold"),
+                Text("p50 sample duration:", style="bold"),
                 f"  {p50_str}",
                 style=theme.light,
             )
