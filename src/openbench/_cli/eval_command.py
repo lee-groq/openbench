@@ -10,6 +10,7 @@ from inspect_ai.log import EvalLog
 from openbench.config import load_task
 from openbench.monkeypatch.display_results_patch import patch_display_results
 from openbench._cli.utils import parse_cli_args
+from openbench.agents import AgentManager
 
 
 class SandboxType(str, Enum):
@@ -80,7 +81,13 @@ def validate_model_name(model: str, context: str = "") -> None:
     Raises:
         typer.BadParameter: If model name format is invalid
     """
-    if not model or "/" not in model:
+    if "/" not in model:
+        raise typer.BadParameter(
+            f"Invalid model name format{context}: {model}. Expected format: provider/model-name"
+        )
+
+    provider, remainder = model.split("/", 1)
+    if not provider or not remainder:
         raise typer.BadParameter(
             f"Invalid model name format{context}: {model}. Expected format: provider/model-name"
         )
@@ -326,6 +333,14 @@ def run_eval(
             envvar="BENCH_ALPHA",
         ),
     ] = False,
+    code_agent: Annotated[
+        Optional[str],
+        typer.Option(
+            "--code-agent",
+            help=AgentManager.get_help_text(),
+            envvar="BENCH_CODE_AGENT",
+        ),
+    ] = None,
 ) -> List[EvalLog] | None:
     """
     Run a benchmark on a model.
@@ -333,6 +348,20 @@ def run_eval(
     # Parse model and task arguments
     model_args = parse_cli_args(m) if m else {}
     task_args = parse_cli_args(t) if t else {}
+
+    # Add code agent to task arguments if specified
+    if code_agent:
+        if not AgentManager.validate_code_agent(code_agent):
+            valid_agents = AgentManager.get_valid_code_agents()
+            raise typer.BadParameter(
+                f"Invalid code agent: {code_agent}. Valid options: {', '.join(valid_agents)}"
+            )
+        task_args["code_agent"] = code_agent
+
+        # Override default model for code agent if still using default
+        if model == ["groq/openai/gpt-oss-20b"]:
+            default_model = AgentManager.get_default_model(code_agent)
+            model = [default_model]
 
     # Validate and aggregate model_role(s) into a dict
     role_models = {}
@@ -348,6 +377,15 @@ def run_eval(
         raise typer.BadParameter(
             "Cannot specify both --model and --model-role candidate=<model>"
         )
+
+    # If using Roo code agent, enforce OpenRouter models
+    if code_agent and code_agent.lower() == "roo":
+        for model_name in model:
+            if not model_name.startswith("openrouter/"):
+                raise typer.BadParameter(
+                    "For --code-agent roo, --model must be an OpenRouter model id prefixed with 'openrouter/'. "
+                    "Example: --model openrouter/anthropic/claude-sonnet-4-20250514"
+                )
 
     # Validate model names
     for model_name in model:
