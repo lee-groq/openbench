@@ -90,3 +90,7 @@ scicode = [
 jsonschemabench = [
     "jsonschema>=4.23.0",
 ]
+ifeval = [
+    "langdetect>=1.0.9",
+    "nltk>=3.9.1",
+]

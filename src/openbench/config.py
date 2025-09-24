@@ -194,6 +194,14 @@ BENCHMARKS = {
         module_path="openbench.evals.exercism.exercism",
         function_name="exercism_rust",
     ),
+    "ifeval": BenchmarkMetadata(
+        name="Instruction Following",
+        description="Tests ability to follow specific formatting and content constraints with both strict and loose evaluation metrics",
+        category="core",
+        tags=["instruction-following", "constraints", "formatting"],
+        module_path="openbench.evals.ifeval",
+        function_name="ifeval",
+    ),
     "openbookqa": BenchmarkMetadata(
         name="OpenBookQA",
         description="Elementary-level science questions probing understanding of core facts",
