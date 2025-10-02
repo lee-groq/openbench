@@ -44,7 +44,7 @@ from openbench.utils.mcq import MCQEval, MCQSample
 from openbench.utils.text import create_dynamic_multiple_choice_prompt
 
 
-def record_to_mcq_sample(record: dict, instruction: str) -> MCQSample:
+def record_to_mcq_sample(record: dict) -> MCQSample:
     """
     Convert a BBH record to an OpenBench MCQSample.
 
@@ -55,12 +55,8 @@ def record_to_mcq_sample(record: dict, instruction: str) -> MCQSample:
     input_text = record["input"]
     target = record["target"]
 
-    # Some BBH tasks have options listed in the input, others don't
-    # We'll use the input as-is and add instruction if provided
-    if instruction:
-        prompt = f"{instruction}{input_text}"
-    else:
-        prompt = input_text
+    # Use input as-is - prompt_template will be prepended by MCQEval
+    prompt = input_text
 
     # For BBH, the target is already the answer text
     # We'll format it as a letter-based choice for MCQEval
@@ -94,8 +90,6 @@ def record_to_mcq_sample(record: dict, instruction: str) -> MCQSample:
             )
 
         prompt = create_dynamic_multiple_choice_prompt(question, choices)
-        if instruction:
-            prompt = f"{instruction}{prompt}"
 
         return MCQSample(
             input=prompt,
@@ -125,6 +119,23 @@ def record_to_mcq_sample(record: dict, instruction: str) -> MCQSample:
 
 
 @task
+def bbh(
+    subset_name: str | None = None,
+    split: str = "test",
+    prompt_template: str | None = None,
+) -> Task:
+    return MCQEval(
+        name="bbh" + (f"_{subset_name}" if subset_name else ""),
+        dataset_path="lukaemon/bbh",
+        subset_name=subset_name,
+        record_to_mcq_sample=record_to_mcq_sample,
+        split=split,
+        auto_id=True,
+        prompt_template=prompt_template,
+    )
+
+
+@task
 def bbh_causal_judgment(split: str = "test") -> Task:
     """
     Evaluate BBH causal judgment task.
@@ -139,13 +150,10 @@ def bbh_causal_judgment(split: str = "test") -> Task:
     """
     instruction = "Answer questions about causal attribution.\n\n"
 
-    return MCQEval(
-        name="bbh_causal_judgment",
-        dataset_path="lukaemon/bbh",
-        subset_name="causal_judgement",  # Note: dataset uses British spelling
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
+    return bbh(
+        subset_name="causal_judgement",
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -164,13 +172,10 @@ def bbh_date_understanding(split: str = "test") -> Task:
     """
     instruction = "Infer the date from context.\n\n"
 
-    return MCQEval(
-        name="bbh_date_understanding",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="date_understanding",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -189,13 +194,10 @@ def bbh_disambiguation_qa(split: str = "test") -> Task:
     """
     instruction = "Clarify the meaning of sentences with ambiguous pronouns.\n\n"
 
-    return MCQEval(
-        name="bbh_disambiguation_qa",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="disambiguation_qa",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -214,13 +216,10 @@ def bbh_geometric_shapes(split: str = "test") -> Task:
     """
     instruction = "Name geometric shapes from their SVG paths.\n\n"
 
-    return MCQEval(
-        name="bbh_geometric_shapes",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="geometric_shapes",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -239,13 +238,10 @@ def bbh_logical_deduction_five_objects(split: str = "test") -> Task:
     """
     instruction = "A logical deduction task which requires deducing the order of a sequence of objects.\n\n"
 
-    return MCQEval(
-        name="bbh_logical_deduction_five_objects",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="logical_deduction_five_objects",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -264,13 +260,10 @@ def bbh_logical_deduction_seven_objects(split: str = "test") -> Task:
     """
     instruction = "A logical deduction task which requires deducing the order of a sequence of objects.\n\n"
 
-    return MCQEval(
-        name="bbh_logical_deduction_seven_objects",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="logical_deduction_seven_objects",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -289,13 +282,10 @@ def bbh_logical_deduction_three_objects(split: str = "test") -> Task:
     """
     instruction = "A logical deduction task which requires deducing the order of a sequence of objects.\n\n"
 
-    return MCQEval(
-        name="bbh_logical_deduction_three_objects",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="logical_deduction_three_objects",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -314,13 +304,10 @@ def bbh_movie_recommendation(split: str = "test") -> Task:
     """
     instruction = "Recommend movies similar to the given list of movies.\n\n"
 
-    return MCQEval(
-        name="bbh_movie_recommendation",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="movie_recommendation",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -339,13 +326,10 @@ def bbh_navigate(split: str = "test") -> Task:
     """
     instruction = "Given a series of navigation instructions, determine whether one would end up back at the starting point.\n\n"
 
-    return MCQEval(
-        name="bbh_navigate",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="navigate",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -364,13 +348,10 @@ def bbh_reasoning_about_colored_objects(split: str = "test") -> Task:
     """
     instruction = "Answer extremely simple questions about the colors of objects on a surface.\n\n"
 
-    return MCQEval(
-        name="bbh_reasoning_about_colored_objects",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="reasoning_about_colored_objects",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -389,13 +370,10 @@ def bbh_ruin_names(split: str = "test") -> Task:
     """
     instruction = "Select the humorous edit that 'ruins' the input movie or musical artist name.\n\n"
 
-    return MCQEval(
-        name="bbh_ruin_names",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="ruin_names",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -414,13 +392,10 @@ def bbh_salient_translation_error_detection(split: str = "test") -> Task:
     """
     instruction = "Detect the type of error in an English translation of a German source sentence.\n\n"
 
-    return MCQEval(
-        name="bbh_salient_translation_error_detection",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="salient_translation_error_detection",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -439,13 +414,10 @@ def bbh_snarks(split: str = "test") -> Task:
     """
     instruction = 'Determine which of two sentences is sarcastic.\n\nAccording to Cambridge University Dictionary, sarcasm is "the use of remarks that clearly mean the opposite of what they say, made in order to hurt someone\'s feelings or to criticize something in a humorous way." Sarcastic sentences often contain satirical or ironic utterances, hyperboles, ambivalent or witty remarks.\n\n'
 
-    return MCQEval(
-        name="bbh_snarks",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="snarks",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -464,13 +436,10 @@ def bbh_sports_understanding(split: str = "test") -> Task:
     """
     instruction = "Determine whether an artificially constructed sentence relating to sports is plausible or not.\n\n"
 
-    return MCQEval(
-        name="bbh_sports_understanding",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="sports_understanding",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -489,13 +458,10 @@ def bbh_temporal_sequences(split: str = "test") -> Task:
     """
     instruction = "Task description: Answer questions about which times certain events could have occurred.\n\n"
 
-    return MCQEval(
-        name="bbh_temporal_sequences",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="temporal_sequences",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -514,13 +480,10 @@ def bbh_tracking_shuffled_objects_five_objects(split: str = "test") -> Task:
     """
     instruction = "A task requiring determining the final positions of a set of objects given their initial positions and a description of a sequence of swaps.\n\n"
 
-    return MCQEval(
-        name="bbh_tracking_shuffled_objects_five_objects",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="tracking_shuffled_objects_five_objects",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -539,13 +502,10 @@ def bbh_tracking_shuffled_objects_seven_objects(split: str = "test") -> Task:
     """
     instruction = "A task requiring determining the final positions of a set of objects given their initial positions and a description of a sequence of swaps.\n\n"
 
-    return MCQEval(
-        name="bbh_tracking_shuffled_objects_seven_objects",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="tracking_shuffled_objects_seven_objects",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
 
 
@@ -564,97 +524,8 @@ def bbh_tracking_shuffled_objects_three_objects(split: str = "test") -> Task:
     """
     instruction = "A task requiring determining the final positions of a set of objects given their initial positions and a description of a sequence of swaps.\n\n"
 
-    return MCQEval(
-        name="bbh_tracking_shuffled_objects_three_objects",
-        dataset_path="lukaemon/bbh",
+    return bbh(
         subset_name="tracking_shuffled_objects_three_objects",
-        record_to_mcq_sample=lambda record: record_to_mcq_sample(record, instruction),
         split=split,
-        auto_id=True,
+        prompt_template=instruction,
     )
-
-
-# Central BBH task that runs all 18 subtasks
-BBH_TASKS = [
-    "causal_judgment",
-    "date_understanding",
-    "disambiguation_qa",
-    "geometric_shapes",
-    "logical_deduction_five_objects",
-    "logical_deduction_seven_objects",
-    "logical_deduction_three_objects",
-    "movie_recommendation",
-    "navigate",
-    "reasoning_about_colored_objects",
-    "ruin_names",
-    "salient_translation_error_detection",
-    "snarks",
-    "sports_understanding",
-    "temporal_sequences",
-    "tracking_shuffled_objects_five_objects",
-    "tracking_shuffled_objects_seven_objects",
-    "tracking_shuffled_objects_three_objects",
-]
-
-
-@task  # type: ignore
-def bbh(split: str = "test") -> list[Task]:
-    """
-    BigBench Hard (BBH) suite - Run all 18 challenging reasoning tasks together.
-
-    This function runs all 18 BBH tasks in a single evaluation, providing
-    aggregate metrics across the entire BBH suite. BBH tests chain-of-thought
-    reasoning across diverse challenging problems.
-
-    Args:
-        split: Dataset split to use (only "test" available)
-
-    Returns:
-        list[Task]: List of all 18 BBH tasks
-
-    Example:
-        ```bash
-        # Run all 18 BBH tasks together
-        bench eval bbh --model openai/gpt-4o
-
-        # With limited samples for quick testing
-        bench eval bbh --model openai/gpt-4o --limit 20
-
-        # Run individual task
-        bench eval bbh_causal_judgment --model openai/gpt-4o
-        ```
-
-        Programmatic access:
-        ```python
-        from openbench.evals.bigbench_hard import bbh
-        tasks = bbh(split="test")
-        ```
-    """
-    import sys
-
-    print(
-        "⚠️  Running all 18 BigBench Hard tasks.\n"
-        "   To run individual tasks: bench eval bbh_<task_name>\n"
-        f"   Available tasks: {', '.join(BBH_TASKS[:3])}...\n",
-        file=sys.stderr,
-    )
-    return [
-        bbh_causal_judgment(split=split),
-        bbh_date_understanding(split=split),
-        bbh_disambiguation_qa(split=split),
-        bbh_geometric_shapes(split=split),
-        bbh_logical_deduction_five_objects(split=split),
-        bbh_logical_deduction_seven_objects(split=split),
-        bbh_logical_deduction_three_objects(split=split),
-        bbh_movie_recommendation(split=split),
-        bbh_navigate(split=split),
-        bbh_reasoning_about_colored_objects(split=split),
-        bbh_ruin_names(split=split),
-        bbh_salient_translation_error_detection(split=split),
-        bbh_snarks(split=split),
-        bbh_sports_understanding(split=split),
-        bbh_temporal_sequences(split=split),
-        bbh_tracking_shuffled_objects_five_objects(split=split),
-        bbh_tracking_shuffled_objects_seven_objects(split=split),
-        bbh_tracking_shuffled_objects_three_objects(split=split),
-    ]
