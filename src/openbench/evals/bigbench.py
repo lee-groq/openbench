@@ -285,7 +285,6 @@ BIGBENCH_TASKS = [
 def _make_task_wrapper(subset_name: str):
     """Create a wrapper function for a specific BigBench subset."""
 
-    @task
     def wrapper() -> Task:
         return MCQEval(
             name=f"bigbench_{subset_name}",
@@ -296,9 +295,11 @@ def _make_task_wrapper(subset_name: str):
             auto_id=True,
         )
 
+    # Set the function name BEFORE applying @task decorator
     wrapper.__name__ = f"bigbench_{subset_name}"
     wrapper.__qualname__ = f"bigbench_{subset_name}"
-    return wrapper
+    # Now apply the decorator
+    return task(wrapper)
 
 
 for subset in BIGBENCH_TASKS:
