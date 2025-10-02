@@ -212,6 +212,7 @@ _override_builtin_openrouter_provider()
 
 # Core benchmarks
 from .evals.bigbench_hard import (  # noqa: F401, E402
+    bbh,
     bbh_causal_judgment,
     bbh_date_understanding,
     bbh_disambiguation_qa,

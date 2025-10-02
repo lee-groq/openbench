@@ -592,22 +592,44 @@ BBH_TASKS = [
 
 def bbh(split: str = "test") -> list[Task]:
     """
-    Get all 18 BigBench Hard (BBH) tasks for programmatic access.
+    BigBench Hard (BBH) suite - Run all 18 challenging reasoning tasks together.
 
-    This function returns a list of all 18 BBH subtasks that can be used
-    programmatically. To run all BBH tasks via CLI, use a glob pattern:
-
-    ```bash
-    # Run all BBH tasks
-    bench eval "bbh_*" --model "openrouter/openai/gpt-oss-120b" -M only=groq
-    ```
+    This function runs all 18 BBH tasks in a single evaluation, providing
+    aggregate metrics across the entire BBH suite. BBH tests chain-of-thought
+    reasoning across diverse challenging problems.
 
     Args:
         split: Dataset split to use (only "test" available)
 
     Returns:
         list[Task]: List of all 18 BBH tasks
+
+    Example:
+        ```bash
+        # Run all 18 BBH tasks together
+        bench eval bbh --model openai/gpt-4o
+
+        # With limited samples for quick testing
+        bench eval bbh --model openai/gpt-4o --limit 20
+
+        # Run individual task
+        bench eval bbh_causal_judgment --model openai/gpt-4o
+        ```
+
+        Programmatic access:
+        ```python
+        from openbench.evals.bigbench_hard import bbh
+        tasks = bbh(split="test")
+        ```
     """
+    import sys
+
+    print(
+        "⚠️  Running all 18 BigBench Hard tasks.\n"
+        "   To run individual tasks: bench eval bbh_<task_name>\n"
+        f"   Available tasks: {', '.join(BBH_TASKS[:3])}...\n",
+        file=sys.stderr,
+    )
     return [
         bbh_causal_judgment(split=split),
         bbh_date_understanding(split=split),

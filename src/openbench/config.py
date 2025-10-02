@@ -520,6 +520,14 @@ BENCHMARKS = {
         module_path="openbench.evals.matharena.hmmt_feb_2025.hmmt_feb_2025",
         function_name="hmmt_feb_2025",
     ),
+    "bbh": BenchmarkMetadata(
+        name="BigBench Hard (All 18 Tasks)",
+        description="Run all 18 BBH challenging reasoning tasks together",
+        category="core",
+        tags=["multiple-choice", "reasoning", "bigbench", "chain-of-thought", "suite"],
+        module_path="openbench.evals.bigbench_hard",
+        function_name="bbh",
+    ),
     "bbh_causal_judgment": BenchmarkMetadata(
         name="BBH: Causal Judgment",
         description="BigBench Hard - Causal judgment reasoning",
