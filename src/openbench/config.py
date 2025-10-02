@@ -520,6 +520,14 @@ BENCHMARKS = {
         module_path="openbench.evals.matharena.hmmt_feb_2025.hmmt_feb_2025",
         function_name="hmmt_feb_2025",
     ),
+    "global_mmlu": BenchmarkMetadata(
+        name="Global-MMLU (42 Languages)",
+        description="Culturally adapted multilingual MMLU with 42 languages",
+        category="core",
+        tags=["multiple-choice", "multilingual", "cultural-sensitivity", "mmlu"],
+        module_path="openbench.evals.global_mmlu",
+        function_name="global_mmlu",
+    ),
     "boolq": BenchmarkMetadata(
         name="BoolQ",
         description="BoolQ: A Question Answering Dataset for Boolean Reasoning",
