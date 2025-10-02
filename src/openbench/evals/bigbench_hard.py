@@ -592,25 +592,21 @@ BBH_TASKS = [
 
 def bbh(split: str = "test") -> list[Task]:
     """
-    Evaluate all 18 BigBench Hard (BBH) tasks together.
+    Get all 18 BigBench Hard (BBH) tasks for programmatic access.
 
-    This meta-task runs all 18 BBH subtasks in a single evaluation, providing
-    aggregate metrics across the entire BBH suite.
+    This function returns a list of all 18 BBH subtasks that can be used
+    programmatically. To run all BBH tasks via CLI, use a glob pattern:
+
+    ```bash
+    # Run all BBH tasks
+    bench eval "bbh_*" --model "openrouter/openai/gpt-oss-120b" -M only=groq
+    ```
 
     Args:
         split: Dataset split to use (only "test" available)
 
     Returns:
         list[Task]: List of all 18 BBH tasks
-
-    Sample usage:
-    ```bash
-    # Run all BBH tasks together
-    bench eval bbh --model "openrouter/openai/gpt-oss-120b" -M only=groq
-
-    # With limited samples for quick testing
-    bench eval bbh --model "openrouter/openai/gpt-oss-120b" --limit 10 -M only=groq
-    ```
     """
     return [
         bbh_causal_judgment(split=split),
