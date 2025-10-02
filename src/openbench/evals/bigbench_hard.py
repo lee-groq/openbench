@@ -104,11 +104,18 @@ def record_to_mcq_sample(record: dict, instruction: str) -> MCQSample:
         )
     else:
         # No clear choices found, use input as-is
-        # Clean target - remove parentheses and take only first character
+        # Clean target - remove parentheses and take only first character if valid letter
         clean_target = target.strip().upper().replace("(", "").replace(")", "").strip()
-        if len(clean_target) > 1 and not clean_target[1:].isalpha():
-            # Handle formats like "A)" or "A."
+
+        # Extract only first character if it's a letter, otherwise use first letter
+        if clean_target and clean_target[0].isalpha():
             clean_target = clean_target[0]
+        elif clean_target:
+            # Find first alphabetic character
+            for char in clean_target:
+                if char.isalpha():
+                    clean_target = char
+                    break
 
         return MCQSample(
             input=prompt,
