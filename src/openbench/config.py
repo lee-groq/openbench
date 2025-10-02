@@ -520,22 +520,8 @@ BENCHMARKS = {
         module_path="openbench.evals.matharena.hmmt_feb_2025.hmmt_feb_2025",
         function_name="hmmt_feb_2025",
     ),
-    "bigbench": BenchmarkMetadata(
-        name="BigBench (All 122 MCQ Tasks)",
-        description="BIG-Bench multiple-choice tasks across 122 diverse domains",
-        category="core",
-        tags=["multiple-choice", "reasoning", "bigbench", "suite"],
-        module_path="openbench.evals.bigbench",
-        function_name="bigbench",
-    ),
-    "bigbench_lite": BenchmarkMetadata(
-        name="BigBench Lite (18 Curated MCQ Tasks)",
-        description="Official BigBench Lite curated subset of 18 MCQ tasks",
-        category="core",
-        tags=["multiple-choice", "reasoning", "bigbench", "lite", "suite"],
-        module_path="openbench.evals.bigbench",
-        function_name="bigbench_lite",
-    ),
+    # Note: bigbench() and bigbench_lite() removed - use individual tasks instead
+    # e.g., bigbench_arithmetic, bigbench_strategyqa, etc.
     "boolq": BenchmarkMetadata(
         name="BoolQ",
         description="BoolQ: A Question Answering Dataset for Boolean Reasoning",

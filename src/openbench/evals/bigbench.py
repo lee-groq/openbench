@@ -281,127 +281,24 @@ BIGBENCH_TASKS = [
 ]
 
 
-def bigbench(subset: str | None = None, split: str = "train") -> Task | list[Task]:
-    """
-    BigBench suite - Run all 122 BigBench MCQ tasks.
-
-    When called without arguments, returns a list of all 122 BigBench task instances.
-    When called with a specific subset, returns that single task.
-
-    Args:
-        subset: Specific BigBench task to run. If None, returns all 122 tasks.
-        split: Dataset split (default: 'train')
-
-    Returns:
-        Task or list[Task]: Single task if subset provided, else all 122 tasks
-
-    Example:
-        # Run all 122 BigBench tasks
-        bench eval bigbench --model groq/llama-3.1-8b-instant
-
-        # Run specific task
-        bench eval bigbench -T subset=emoji_movie --model groq/llama-3.1-8b-instant
-
-        # Or use individual task directly
-        bench eval bigbench_arithmetic --model groq/llama-3.1-8b-instant
-    """
-    # If no subset specified, return all 122 BigBench tasks
-    if subset is None:
-        return [
-            MCQEval(
-                name=f"bigbench_{task}",
-                dataset_path="tasksource/bigbench",
-                subset_name=task,
-                record_to_mcq_sample=record_to_mcq_sample_bigbench,
-                split=split,
-                auto_id=True,
-            )
-            for task in BIGBENCH_TASKS
-        ]
-
-    # Return single task for specific subset
-    return MCQEval(
-        name="bigbench" + (f"_{subset}" if subset else ""),
-        dataset_path="tasksource/bigbench",
-        subset_name=subset,
-        record_to_mcq_sample=record_to_mcq_sample_bigbench,
-        split=split,
-        auto_id=True,
-    )
-
-
-def bigbench_lite(subset: str | None = None, split: str = "train") -> Task | list[Task]:
-    """
-    BigBench Lite suite - Run all 18 curated BIG-Bench MCQ tasks.
-
-    When called without arguments, returns a list of all 18 BigBench Lite task instances.
-    When called with a specific subset, returns that single task.
-
-    This is the official BigBench Lite (BBL) curated subset, selected for
-    lightweight evaluation across diverse reasoning abilities.
-
-    Note: The official BBL has 24 tasks, but 6 are free-response format and
-    not yet implemented (auto_debugging, conlang_translation, linguistics_puzzles,
-    operators, parsinlu_reading_comprehension, repeat_copy_logic).
-
-    Args:
-        subset: Specific BBL task to run. If None, returns all 18 tasks.
-        split: Dataset split (default: 'train')
-
-    Returns:
-        Task or list[Task]: Single task if subset provided, else all 18 tasks
-
-    Example:
-        # Run all 18 BigBench Lite tasks
-        bench eval bigbench_lite --model groq/llama-3.1-8b-instant
-
-        # Run specific BBL task
-        bench eval bigbench_lite -T subset=strategyqa --model groq/llama-3.1-8b-instant
-
-        # Or use individual task directly
-        bench eval bigbench_emoji_movie --model groq/llama-3.1-8b-instant
-    """
-    # If no subset specified, return all 18 BigBench Lite tasks
-    if subset is None:
-        return [
-            MCQEval(
-                name=f"bigbench_{task}",
-                dataset_path="tasksource/bigbench",
-                subset_name=task,
-                record_to_mcq_sample=record_to_mcq_sample_bigbench,
-                split=split,
-                auto_id=True,
-            )
-            for task in BIGBENCH_LITE_TASKS
-        ]
-
-    # Return single task for specific subset
-    return MCQEval(
-        name="bigbench_lite" + (f"_{subset}" if subset else ""),
-        dataset_path="tasksource/bigbench",
-        subset_name=subset,
-        record_to_mcq_sample=record_to_mcq_sample_bigbench,
-        split=split,
-        auto_id=True,
-    )
-
-
 # Generate all BigBench tasks as individual wrapper functions
-# Use a closure factory to properly capture each subset value
 def _make_task_wrapper(subset_name: str):
     """Create a wrapper function for a specific BigBench subset."""
 
+    @task
     def wrapper() -> Task:
-        result = bigbench(subset=subset_name)
-        # When subset is specified, bigbench always returns a Task (not a list)
-        assert isinstance(result, Task)
-        return result
+        return MCQEval(
+            name=f"bigbench_{subset_name}",
+            dataset_path="tasksource/bigbench",
+            subset_name=subset_name,
+            record_to_mcq_sample=record_to_mcq_sample_bigbench,
+            split="train",
+            auto_id=True,
+        )
 
-    # Set the function name BEFORE applying @task decorator to avoid registry collisions
     wrapper.__name__ = f"bigbench_{subset_name}"
     wrapper.__qualname__ = f"bigbench_{subset_name}"
-    # Now apply the decorator
-    return task(wrapper)
+    return wrapper
 
 
 for subset in BIGBENCH_TASKS:
