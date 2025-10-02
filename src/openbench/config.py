@@ -552,6 +552,22 @@ BENCHMARKS = {
         module_path="openbench.evals.headqa",
         function_name="headqa",
     ),
+    "headqa_en": BenchmarkMetadata(
+        name="HeadQA (English)",
+        description="Spanish healthcare specialization exam questions in English",
+        category="core",
+        tags=["multiple-choice", "medical", "healthcare", "english"],
+        module_path="openbench.evals.headqa",
+        function_name="headqa_en",
+    ),
+    "headqa_es": BenchmarkMetadata(
+        name="HeadQA (Spanish)",
+        description="Spanish healthcare specialization exam questions in Spanish",
+        category="core",
+        tags=["multiple-choice", "medical", "healthcare", "spanish"],
+        module_path="openbench.evals.headqa",
+        function_name="headqa_es",
+    ),
     "boolq": BenchmarkMetadata(
         name="BoolQ",
         description="BoolQ: A Question Answering Dataset for Boolean Reasoning",
