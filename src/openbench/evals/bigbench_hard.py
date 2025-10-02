@@ -590,6 +590,7 @@ BBH_TASKS = [
 ]
 
 
+@task  # type: ignore
 def bbh(split: str = "test") -> list[Task]:
     """
     BigBench Hard (BBH) suite - Run all 18 challenging reasoning tasks together.

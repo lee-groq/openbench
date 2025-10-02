@@ -211,27 +211,7 @@ _override_builtin_openrouter_provider()
 # Task Registration
 
 # Core benchmarks
-from .evals.bigbench_hard import (  # noqa: F401, E402
-    bbh,
-    bbh_causal_judgment,
-    bbh_date_understanding,
-    bbh_disambiguation_qa,
-    bbh_geometric_shapes,
-    bbh_logical_deduction_five_objects,
-    bbh_logical_deduction_seven_objects,
-    bbh_logical_deduction_three_objects,
-    bbh_movie_recommendation,
-    bbh_navigate,
-    bbh_reasoning_about_colored_objects,
-    bbh_ruin_names,
-    bbh_salient_translation_error_detection,
-    bbh_snarks,
-    bbh_sports_understanding,
-    bbh_temporal_sequences,
-    bbh_tracking_shuffled_objects_five_objects,
-    bbh_tracking_shuffled_objects_seven_objects,
-    bbh_tracking_shuffled_objects_three_objects,
-)
+from .evals import bigbench_hard  # noqa: F401, E402
 from .evals.clockbench import clockbench  # noqa: F401, E402
 from .evals.drop import drop  # noqa: F401, E402
 from .evals.gpqa_diamond import gpqa_diamond  # noqa: F401, E402
