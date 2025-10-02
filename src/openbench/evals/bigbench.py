@@ -281,29 +281,45 @@ BIGBENCH_TASKS = [
 ]
 
 
-@task
-def bigbench(subset: str | None = None, split: str = "train") -> Task:
+def bigbench(subset: str | None = None, split: str = "train") -> Task | list[Task]:
     """
-    BigBench family benchmark - Multiple choice tasks from BIG-Bench.
+    BigBench suite - Run all 122 BigBench MCQ tasks.
 
-    This is the family benchmark that allows programmatic access to any of the
-    122 MCQ tasks in BigBench.
+    When called without arguments, returns a list of all 122 BigBench task instances.
+    When called with a specific subset, returns that single task.
 
     Args:
-        subset: The specific BigBench task to run (required - dataset doesn't support loading all at once).
-        split: Dataset split to use (default: 'train')
+        subset: Specific BigBench task to run. If None, returns all 122 tasks.
+        split: Dataset split (default: 'train')
+
+    Returns:
+        Task or list[Task]: Single task if subset provided, else all 122 tasks
 
     Example:
-        # Run specific task via family benchmark
+        # Run all 122 BigBench tasks
+        bench eval bigbench --model groq/llama-3.1-8b-instant
+
+        # Run specific task
         bench eval bigbench -T subset=emoji_movie --model groq/llama-3.1-8b-instant
 
-        # Run individual task directly
+        # Or use individual task directly
         bench eval bigbench_arithmetic --model groq/llama-3.1-8b-instant
-        bench eval bigbench_strategyqa --model groq/llama-3.1-8b-instant
-
-        # Programmatic access
-        result = eval(bigbench(subset="strategyqa"), model)
     """
+    # If no subset specified, return all 122 BigBench tasks
+    if subset is None:
+        return [
+            MCQEval(
+                name=f"bigbench_{task}",
+                dataset_path="tasksource/bigbench",
+                subset_name=task,
+                record_to_mcq_sample=record_to_mcq_sample_bigbench,
+                split=split,
+                auto_id=True,
+            )
+            for task in BIGBENCH_TASKS
+        ]
+
+    # Return single task for specific subset
     return MCQEval(
         name="bigbench" + (f"_{subset}" if subset else ""),
         dataset_path="tasksource/bigbench",
@@ -314,10 +330,12 @@ def bigbench(subset: str | None = None, split: str = "train") -> Task:
     )
 
 
-@task
-def bigbench_lite(subset: str | None = None, split: str = "train") -> Task:
+def bigbench_lite(subset: str | None = None, split: str = "train") -> Task | list[Task]:
     """
-    BigBench Lite - Curated subset of 18 BIG-Bench MCQ tasks.
+    BigBench Lite suite - Run all 18 curated BIG-Bench MCQ tasks.
+
+    When called without arguments, returns a list of all 18 BigBench Lite task instances.
+    When called with a specific subset, returns that single task.
 
     This is the official BigBench Lite (BBL) curated subset, selected for
     lightweight evaluation across diverse reasoning abilities.
@@ -327,16 +345,37 @@ def bigbench_lite(subset: str | None = None, split: str = "train") -> Task:
     operators, parsinlu_reading_comprehension, repeat_copy_logic).
 
     Args:
-        subset: The specific BBL task to run (required - dataset doesn't support loading all at once).
-        split: Dataset split to use (default: 'train')
+        subset: Specific BBL task to run. If None, returns all 18 tasks.
+        split: Dataset split (default: 'train')
+
+    Returns:
+        Task or list[Task]: Single task if subset provided, else all 18 tasks
 
     Example:
+        # Run all 18 BigBench Lite tasks
+        bench eval bigbench_lite --model groq/llama-3.1-8b-instant
+
         # Run specific BBL task
         bench eval bigbench_lite -T subset=strategyqa --model groq/llama-3.1-8b-instant
 
         # Or use individual task directly
         bench eval bigbench_emoji_movie --model groq/llama-3.1-8b-instant
     """
+    # If no subset specified, return all 18 BigBench Lite tasks
+    if subset is None:
+        return [
+            MCQEval(
+                name=f"bigbench_{task}",
+                dataset_path="tasksource/bigbench",
+                subset_name=task,
+                record_to_mcq_sample=record_to_mcq_sample_bigbench,
+                split=split,
+                auto_id=True,
+            )
+            for task in BIGBENCH_LITE_TASKS
+        ]
+
+    # Return single task for specific subset
     return MCQEval(
         name="bigbench_lite" + (f"_{subset}" if subset else ""),
         dataset_path="tasksource/bigbench",
