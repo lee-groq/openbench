@@ -302,6 +302,12 @@ from .evals import xcopa  # noqa: F401, E402
 from .evals import xstorycloze  # noqa: F401, E402
 from .evals import xwinograd  # noqa: F401, E402
 
+# Knowledge QA benchmarks
+from .evals import logiqa  # noqa: F401, E402
+from .evals import mathqa  # noqa: F401, E402
+from .evals import sciq  # noqa: F401, E402
+from .evals import truthfulqa  # noqa: F401, E402
+
 # Linguistic Phenomena benchmarks
 from .evals import blimp  # noqa: F401, E402
 
