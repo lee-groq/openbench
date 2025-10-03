@@ -302,6 +302,11 @@ from .evals import xcopa  # noqa: F401, E402
 from .evals import xstorycloze  # noqa: F401, E402
 from .evals import xwinograd  # noqa: F401, E402
 
+# Ethics & Social Understanding benchmarks
+from .evals import ethics  # noqa: F401, E402
+from .evals import social_iqa  # noqa: F401, E402
+from .evals import toxigen  # noqa: F401, E402
+
 # Reading Comprehension benchmarks
 from .evals import race  # noqa: F401, E402
 from .evals import qa4mre  # noqa: F401, E402
