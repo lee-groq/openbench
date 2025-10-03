@@ -211,12 +211,8 @@ _override_builtin_openrouter_provider()
 # Task Registration
 
 # Core benchmarks
-<<<<<<< HEAD
-from .evals import global_mmlu  # noqa: F401, E402
-=======
 from .evals.arc import arc_easy, arc_challenge  # noqa: F401, E402
 from .evals import bigbench, bigbench_hard, global_mmlu  # noqa: F401, E402
->>>>>>> main
 from .evals.clockbench import clockbench  # noqa: F401, E402
 from .evals.drop import drop  # noqa: F401, E402
 from .evals.gpqa_diamond import gpqa_diamond  # noqa: F401, E402
