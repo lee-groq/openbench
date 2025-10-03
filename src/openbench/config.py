@@ -145,6 +145,14 @@ BENCHMARKS = {
         module_path="openbench.evals.gpqa_diamond",
         function_name="gpqa_diamond",
     ),
+    "gpqa": BenchmarkMetadata(
+        name="GPQA",
+        description="Graduate-level science questions (multiple choice) across physics, chemistry, and biology",
+        category="core",
+        tags=["multiple-choice", "science", "graduate-level", "reasoning"],
+        module_path="openbench.evals.gpqa",
+        function_name="gpqa",
+    ),
     "humaneval": BenchmarkMetadata(
         name="HumanEval",
         description="Code generation benchmark with 164 programming problems",
