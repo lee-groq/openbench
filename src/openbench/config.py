@@ -567,6 +567,7 @@ BENCHMARKS = {
         tags=["multiple-choice", "medical", "healthcare", "spanish"],
         module_path="openbench.evals.headqa",
         function_name="headqa_es",
+    ),
     "arc_easy": BenchmarkMetadata(
         name="ARC-Easy",
         description="AI2 Reasoning Challenge - Easy questions from grade-school science exams",
