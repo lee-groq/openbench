@@ -4163,6 +4163,14 @@ BENCHMARKS = {
         module_path="openbench.evals.agieval",
         function_name="agieval_gaokao_physics",
     ),
+    "legalsupport": BenchmarkMetadata(
+        name="LegalSupport",
+        description="Legal citation support identification - identify which citation provides stronger support for a legal argument",
+        category="domain-specific",
+        tags=["multiple-choice", "legal", "reasoning", "citation-analysis"],
+        module_path="openbench.evals.legalsupport",
+        function_name="legalsupport",
+    ),
 }
 
 
