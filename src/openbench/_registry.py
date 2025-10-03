@@ -302,6 +302,9 @@ from .evals import xcopa  # noqa: F401, E402
 from .evals import xstorycloze  # noqa: F401, E402
 from .evals import xwinograd  # noqa: F401, E402
 
+# Linguistic Phenomena benchmarks
+from .evals import blimp  # noqa: F401, E402
+
 # MathArena benchmarks
 from .evals.matharena.aime_2023_I.aime_2023_I import aime_2023_I  # noqa: F401, E402
 from .evals.matharena.aime_2023_II.aime_2023_II import aime_2023_II  # noqa: F401, E402
