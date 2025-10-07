@@ -2208,7 +2208,6 @@ version = "0.4.1"
 source = { editable = "." }
 dependencies = [
     { name = "datasets" },
-    { name = "deepdiff" },
     { name = "groq" },
     { name = "inspect-ai" },
     { name = "jsonschema" },
@@ -2216,7 +2215,6 @@ dependencies = [
     { name = "openai" },
     { name = "pillow" },
     { name = "platformdirs" },
-    { name = "pydantic", extra = ["email"] },
     { name = "pydantic-settings" },
     { name = "scipy" },
     { name = "tiktoken" },
@@ -2224,6 +2222,10 @@ dependencies = [
 ]
 
 [package.dev-dependencies]
+agentdojo = [
+    { name = "deepdiff" },
+    { name = "pydantic", extra = ["email"] },
+]
 dev = [
     { name = "mypy" },
     { name = "pre-commit" },
@@ -2248,7 +2250,6 @@ scicode = [
 [package.metadata]
 requires-dist = [
     { name = "datasets", specifier = ">=3.6.0" },
-    { name = "deepdiff", specifier = ">=8.0.0" },
     { name = "groq", specifier = ">=0.30.0" },
     { name = "inspect-ai", specifier = "==0.3.125" },
     { name = "jsonschema", specifier = ">=4.23.0" },
@@ -2256,7 +2257,6 @@ requires-dist = [
     { name = "openai", specifier = ">=1.99.7" },
     { name = "pillow", specifier = ">=10.0.0" },
     { name = "platformdirs", specifier = ">=4.0.0" },
-    { name = "pydantic", extras = ["email"], specifier = ">=2.9.1" },
     { name = "pydantic-settings", specifier = ">=2.9.1" },
     { name = "scipy", specifier = ">=1.15.3" },
     { name = "tiktoken", specifier = ">=0.11.0" },
@@ -2264,6 +2264,10 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
+agentdojo = [
+    { name = "deepdiff", specifier = ">=8.0.0" },
+    { name = "pydantic", extras = ["email"], specifier = ">=2.9.1" },
+]
 dev = [
     { name = "mypy", specifier = ">=1.15.0" },
     { name = "pre-commit", specifier = ">=4.2.0" },
