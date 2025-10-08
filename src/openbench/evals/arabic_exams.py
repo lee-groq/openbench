@@ -100,6 +100,12 @@ def arabic_exams_islamic_studies_general() -> Task:
 
 
 @task
+def arabic_exams_math_high_school() -> Task:
+    """Arabic Exams: Math (High School)"""
+    return arabic_exams(subset="Math (High School)")
+
+
+@task
 def arabic_exams_math_primary_school() -> Task:
     """Arabic Exams: Math (Primary School)"""
     return arabic_exams(subset="Math (Primary School)")

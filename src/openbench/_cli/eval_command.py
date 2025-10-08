@@ -7,7 +7,7 @@ from inspect_ai import eval
 from inspect_ai.model import Model
 from inspect_ai.log import EvalLog
 
-from openbench.config import load_task
+from openbench.config import load_task, EVAL_GROUPS
 from openbench.monkeypatch.display_results_patch import patch_display_results
 from openbench._cli.utils import parse_cli_args
 from openbench.agents import AgentManager
@@ -119,11 +119,147 @@ def validate_model_role(model_role: Optional[str]) -> Dict[str, str | Model]:
         raise typer.BadParameter(str(e))
 
 
+def expand_eval_groups(
+    benchmarks: List[str],
+) -> Tuple[List[str], dict[str, List[str]]]:
+    """Expand eval group identifiers into their constituent benchmarks.
+
+    Group names are normalized to handle - and _ interchangeably
+    (e.g., "bigbench-lite" and "bigbench_lite" both work).
+
+    Args:
+        benchmarks: List of benchmark names and/or group identifiers
+
+    Returns:
+        Tuple of (all_expanded_benchmarks, groups):
+        - all_expanded_benchmarks: All benchmarks including groups and individual tasks
+        - groups: Dict mapping group display name to list of benchmark names
+
+    Example:
+        expand_eval_groups(["bigbench", "mmlu"])
+        -> (["bigbench_arithmetic", "bigbench_...", "mmlu"], {"BIG-Bench": ["bigbench_arithmetic", ...]})
+    """
+    all_expanded = []
+    groups = {}  # group_name -> list of benchmark names
+
+    for benchmark in benchmarks:
+        # Normalize: Try both with underscores and hyphens for compatibility
+        # Users might type either cti_bench or cti-bench
+        normalized_underscore = benchmark.replace("-", "_")
+        normalized_hyphen = benchmark.replace("_", "-")
+
+        # Check both normalized forms in EVAL_GROUPS
+        group = None
+        if normalized_underscore in EVAL_GROUPS:
+            group = EVAL_GROUPS[normalized_underscore]
+        elif normalized_hyphen in EVAL_GROUPS:
+            group = EVAL_GROUPS[normalized_hyphen]
+
+        if group:
+            # Expand group to its constituent benchmarks
+            typer.echo(
+                f"📦 Expanding group '{benchmark}' -> {len(group.benchmarks)} benchmarks"
+            )
+            all_expanded.extend(group.benchmarks)
+            # Store with display name as key
+            groups[group.name] = group.benchmarks
+        else:
+            # Regular benchmark name (not a group)
+            all_expanded.append(benchmark)
+
+    return all_expanded, groups
+
+
+def display_group_summary(
+    group_name: str, group_benchmarks: List[str], eval_logs: List[EvalLog]
+) -> None:
+    """Display aggregate metrics for a single group.
+
+    Args:
+        group_name: Display name of the group (e.g., "BIG-Bench", "BBH")
+        group_benchmarks: List of benchmark names in this group
+        eval_logs: List of evaluation logs from all benchmarks
+    """
+    # Filter to only logs from this group's benchmarks
+    group_logs = [log for log in eval_logs if log.eval.task in group_benchmarks]
+
+    if not group_logs:
+        return
+
+    # Aggregate metrics
+    total_samples = 0
+    total_correct = 0
+    completed_samples = 0
+
+    for log in group_logs:
+        if log.results:
+            completed_samples += log.results.completed_samples
+
+            # Try to extract accuracy metric to calculate correct count
+            if log.results.scores:
+                for score in log.results.scores:
+                    # Look for accuracy in various possible locations
+                    accuracy_value = None
+
+                    # Check if score.metrics is a dict with "accuracy" key
+                    if hasattr(score, "metrics") and isinstance(score.metrics, dict):
+                        if "accuracy" in score.metrics:
+                            metric = score.metrics["accuracy"]
+                            accuracy_value = (
+                                metric.value if hasattr(metric, "value") else metric
+                            )
+
+                    # Fallback: check score.value directly (for simple scorers)
+                    elif (
+                        hasattr(score, "name")
+                        and score.name == "accuracy"
+                        and hasattr(score, "value")
+                    ):
+                        accuracy_value = score.value
+
+                    # If we found accuracy, calculate correct count
+                    if accuracy_value is not None:
+                        # Extract numeric value if it's an EvalMetric object
+                        numeric_value = float(
+                            accuracy_value.value
+                            if hasattr(accuracy_value, "value")
+                            else accuracy_value
+                        )
+                        correct = int(numeric_value * log.results.completed_samples)
+                        total_correct += correct
+                        total_samples += log.results.completed_samples
+                        break
+
+    # Only display if we have data
+    if total_samples == 0:
+        # Debug: help users understand why no summary was shown
+        if completed_samples > 0:
+            typer.echo(
+                "\n⚠️  Note: Group evaluation completed but aggregate summary unavailable. "
+                "This may occur if benchmarks don't report accuracy metrics."
+            )
+        return
+
+    total_incorrect = total_samples - total_correct
+    aggregate_accuracy = total_correct / total_samples if total_samples > 0 else 0.0
+
+    # Display summary
+    typer.echo("\n" + "=" * 60)
+    typer.echo(f"📊 GROUP SUMMARY - {group_name}")
+    typer.echo("=" * 60)
+    typer.echo(f"Total benchmarks:    {len(group_logs)}")
+    typer.echo(f"Total samples:       {total_samples:,}")
+    typer.echo(f"Correct:             {total_correct:,}")
+    typer.echo(f"Incorrect:           {total_incorrect:,}")
+    typer.echo(f"Aggregate accuracy:  {aggregate_accuracy:.2%}")
+    typer.echo("=" * 60 + "\n")
+
+
 def run_eval(
     benchmarks: Annotated[
         List[str],
         typer.Argument(
-            help="Benchmark(s) to run. Can be a built-in name (e.g. mmlu) or a path to a local eval directory/file containing __metadata__",
+            help="Benchmark(s) to run. Can be a built-in name (e.g. mmlu), a group (e.g. bigbench, bbh, coding), or a path to a local eval directory/file containing __metadata__. Run 'bench list' to see all available groups.",
             envvar="BENCH_BENCHMARKS",
         ),
     ],
@@ -400,9 +536,12 @@ def run_eval(
     for model_name in model:
         validate_model_name(model_name)
 
+    # Expand eval groups into individual benchmarks
+    expanded_benchmarks, groups = expand_eval_groups(benchmarks)
+
     # Load tasks from registry
     tasks = []
-    for benchmark in benchmarks:
+    for benchmark in expanded_benchmarks:
         try:
             task = load_task(benchmark, allow_alpha=alpha)
             tasks.append(task)
@@ -411,7 +550,7 @@ def run_eval(
 
     # auto-prepare caches for livemcpbench
     try:
-        if "livemcpbench" in benchmarks:
+        if "livemcpbench" in expanded_benchmarks:
             prepare_livemcpbench_cache()
     except Exception as e:
         raise typer.BadParameter(str(e))
@@ -465,6 +604,12 @@ def run_eval(
 
             typer.echo("Evaluation complete!")
 
+            # Display group summary if groups were used
+            # Display separate summary for each group
+            if groups:
+                for group_name, group_benchmarks in groups.items():
+                    display_group_summary(group_name, group_benchmarks, eval_logs)
+
             if hub_repo:
                 from openbench._cli.export import export_logs_to_hub
 
@@ -490,5 +635,5 @@ def run_eval(
                 sys.exit(1)
     finally:
         # Auto-clean root sandbox for livemcpbench unless opted out
-        if "livemcpbench" in benchmarks and not keep_livemcp_root:
+        if "livemcpbench" in expanded_benchmarks and not keep_livemcp_root:
             clear_livemcpbench_root(quiet=False)
