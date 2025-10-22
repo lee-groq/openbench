@@ -14,7 +14,7 @@ Note: BoolQ is already implemented separately in boolq.py and is not included he
 Sample usage:
 ```bash
 bench eval copa --model "groq/llama-3.1-8b-instant"
-bench eval rte_superglue --model "groq/llama-3.1-8b-instant"
+bench eval rte --model "groq/llama-3.1-8b-instant"
 ```
 
 The prompts are based on the lighteval implementations:
@@ -78,9 +78,7 @@ def record_to_mcq_sample_rte(record: dict) -> MCQSample:
     can be inferred from a premise.
     """
     input_question = (
-        f"{record['premise']}\n"
-        f"Question: {record['hypothesis']} True or False?\n"
-        f"Answer:"
+        f"{record['premise']}\nQuestion: {record['hypothesis']} True or False?\nAnswer:"
     )
 
     input_msg = prompt(
@@ -187,9 +185,7 @@ def record_to_mcq_sample_multirc(record: dict) -> MCQSample:
     MultiRC (Multi-Sentence Reading Comprehension) tests whether
     a given answer to a question is correct based on a paragraph.
     """
-    input_question = (
-        f"{record['paragraph']}\n" f"Question: {record['question']}\n" f"Answer:"
-    )
+    input_question = f"{record['paragraph']}\nQuestion: {record['question']}\nAnswer:"
 
     # Each sample asks "Is this answer correct?"
     input_msg = prompt(
@@ -220,7 +216,7 @@ SUPERGLUE_SUBSET_CONFIG = {
         "converter": record_to_mcq_sample_copa,
     },
     "rte": {
-        "task_name": "rte_superglue",
+        "task_name": "rte",
         "dataset_subset": "rte",
         "converter": record_to_mcq_sample_rte,
     },
@@ -294,7 +290,7 @@ def copa(split: str = "validation") -> Task:
 
 
 @task
-def rte_superglue(split: str = "validation") -> Task:
+def rte(split: str = "validation") -> Task:
     """
     RTE: Recognizing Textual Entailment (SuperGLUE)
 
