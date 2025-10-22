@@ -4814,6 +4814,14 @@ _BUILTIN_BENCHMARKS = {
         module_path="openbench.evals.toxigen",
         function_name="toxigen",
     ),
+    "agentdojo": BenchmarkMetadata(
+        name="AgentDojo",
+        description="AgentDojo - Evaluates AI robustness against prompt injection attacks from untrusted data and tools",
+        category="ethics-social",
+        tags=["safety", "prompt-injection", "adversarial", "agents"],
+        module_path="openbench.evals.agentdojo",
+        function_name="agentdojo",
+    ),
     # AGIEval benchmarks
     "agieval": BenchmarkMetadata(
         name="AGIEval (All Subsets)",
