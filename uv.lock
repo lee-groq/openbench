@@ -2205,6 +2205,7 @@ version = "0.5.2"
 source = { editable = "." }
 dependencies = [
     { name = "datasets" },
+    { name = "google-api-python-client" },
     { name = "groq" },
     { name = "inspect-ai" },
     { name = "jsonschema" },
@@ -2250,6 +2251,7 @@ simpleqa-verified = [
 [package.metadata]
 requires-dist = [
     { name = "datasets", specifier = ">=3.6.0" },
+    { name = "google-api-python-client", specifier = ">=2.0.0" },
     { name = "groq", specifier = ">=0.30.0" },
     { name = "inspect-ai", specifier = "==0.3.125" },
     { name = "jsonschema", specifier = ">=4.23.0" },

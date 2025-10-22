@@ -333,6 +333,7 @@ from .evals.bbq import (  # noqa: F401, E402
 from .evals import ethics  # noqa: F401, E402
 from .evals import social_iqa  # noqa: F401, E402
 from .evals import toxigen  # noqa: F401, E402
+from .evals import polyglotoxicity  # noqa: F401, E402
 
 # Reading Comprehension benchmarks
 from .evals import race  # noqa: F401, E402
