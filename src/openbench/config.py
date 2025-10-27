@@ -6608,22 +6608,14 @@ EVAL_GROUPS = {
         name="Mathematics - 22 Oct 2025",
         description="Comprehensive mathematics evaluation including competition math, multilingual grade school math, and advanced problem solving",
         benchmarks=[
-            # AIME (American Invitational Mathematics Examination) (7)
-            "aime_2023_I",
-            "aime_2023_II",
-            "aime_2024",
-            "aime_2024_I",
-            "aime_2024_II",
+            # AIME (American Invitational Mathematics Examination) (2)
             "aime_2025",
             "aime_2025_II",
-            # Harvard-MIT Mathematics Tournament (3)
-            "hmmt_feb_2023",
-            "hmmt_feb_2024",
+            # Harvard-MIT Mathematics Tournament (1)
             "hmmt_feb_2025",
             # Brumo Mathematical Olympiad (1)
             "brumo_2025",
-            # OTIS Mock AIME subtasks (2)
-            "otis_mock_aime_2024",
+            # OTIS Mock AIME (1)
             "otis_mock_aime_2025",
             # Stanford Math Tournament subtasks (6)
             "smt_algebra",
