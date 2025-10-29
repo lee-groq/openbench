@@ -7,7 +7,7 @@ from inspect_ai.model import GenerateConfig
 from inspect_ai.solver import generate
 
 from openbench.datasets.factscore import get_dataset
-from openbench.scorers.factscore import factscore_scorer
+from openbench.scorers.factscore import factscore_scorer, is_factscore_available
 
 
 @task
@@ -44,6 +44,11 @@ def factscore(
     Returns:
         Fully configured Inspect ``Task``.
     """
+
+    if not is_factscore_available():
+        raise RuntimeError(
+            "FactScoreLite package is required to run the factscore benchmark."
+        )
 
     dataset = get_dataset(
         split=split,
