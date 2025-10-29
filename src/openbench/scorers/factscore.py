@@ -32,10 +32,15 @@ try:  # pragma: no cover - import guarded for optional dependency
         FactScorer,
         configs as factscorelite_configs,
     )
-except ImportError as exc:  # pragma: no cover - exercised when dependency missing
-    raise RuntimeError(
-        "FactScoreLite scorer requires the 'factscorelite' package."
-    ) from exc
+
+    _FACTSCORE_AVAILABLE = True
+except ImportError:  # pragma: no cover - exercised when dependency missing
+    _FACTSCORE_AVAILABLE = False
+
+
+def is_factscore_available() -> bool:
+    """Check if FactScoreLite package is available."""
+    return _FACTSCORE_AVAILABLE
 
 
 @dataclass
@@ -295,6 +300,11 @@ def factscore_scorer(
     passages: int = 8,
 ) -> Callable[[TaskState, Target], Any]:
     """Create a scorer that evaluates generations using FactScoreLite."""
+
+    if not _FACTSCORE_AVAILABLE:
+        raise RuntimeError(
+            "FactScoreLite scorer requires the 'factscorelite' package. "
+        )
 
     cfg = FactScoreConfig(
         openai_model=_normalise_model_name(model_name),
