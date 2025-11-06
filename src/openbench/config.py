@@ -5685,6 +5685,14 @@ _BUILTIN_BENCHMARKS = {
         module_path="openbench.evals.cosafe_m2s",
         function_name="cosafe_m2s",
     ),
+    "deep_research_bench": BenchmarkMetadata(
+        name="DeepResearch Bench",
+        description="Benchmark for evaluating Deep Research Agents - measures ability to generate comprehensive research articles with citations across Chinese and English queries",
+        category="core",
+        tags=["research", "long-form", "citations", "multilingual", "generation"],
+        module_path="openbench.evals.deep_research_bench",
+        function_name="deep_research_bench",
+    ),
 }
 
 
