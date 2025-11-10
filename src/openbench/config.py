@@ -5712,9 +5712,9 @@ _BUILTIN_BENCHMARKS = {
     ),
     "deep_research_bench": BenchmarkMetadata(
         name="DeepResearch Bench",
-        description="Benchmark for evaluating Deep Research Agents - measures ability to generate comprehensive research articles with citations across Chinese and English queries",
+        description="A comprehensive benchmark for evaluating Deep Research Agents",
         category="core",
-        tags=["research", "long-form", "citations", "multilingual", "generation"],
+        tags=["research", "long-form", "multilingual"],
         module_path="openbench.evals.deep_research_bench",
         function_name="deep_research_bench",
     ),

@@ -1,6 +1,6 @@
 """
 FACT evaluation module for DeepResearch Bench.
-Handles citation extraction, deduplication, validation, and fact-checking pipeline.
+Handles citation extraction, deduplication, validation, and fact-checking pipeline. Evaluated on total citations, valid citations, and valid rate.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from openbench.utils.deep_research_bench_prompts import (
 
 
 class FACTEvaluatorLLM:
-    """Hardcoded Gemini evaluator LLM for FACT evaluation (following original implementation)."""
+    """Gemini evaluator LLM for FACT evaluation."""
 
     def __init__(self):
         self.api_key = os.environ.get("GEMINI_API_KEY")
@@ -36,11 +36,11 @@ class FACTEvaluatorLLM:
         self.client = genai.Client(
             api_key=self.api_key, http_options={"timeout": 600000}
         )
-        self.model = "gemini-2.5-flash-preview-05-20"  # Same as original FACT_Model
+        self.model = "gemini-2.5-flash-preview-05-20"  # Same as original model
 
     async def generate(self, user_prompt: str, system_prompt: str = "") -> str:
-        """Generate text response using hardcoded Gemini model."""
-        # Build request content (following original implementation)
+        """Generate text response using Gemini model."""
+        # Build request content
         contents = []
 
         # Add system prompt if provided
@@ -62,9 +62,7 @@ class FACTEvaluatorLLM:
             return response.text
 
         except Exception as e:
-            raise Exception(
-                f"Failed to generate content with hardcoded FACT evaluator: {str(e)}"
-            )
+            raise Exception(f"Failed to generate content with evaluator: {str(e)}")
 
 
 class JinaWebScraper:
@@ -109,7 +107,7 @@ class JinaWebScraper:
 
 
 def clean_urls(input_text: str) -> str:
-    """Clean URLs by removing #:~:text= fragments (from original extract.py)."""
+    """Clean URLs by removing #:~:text= fragments."""
     # match [title](url) format
     pattern = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 
@@ -126,7 +124,7 @@ def clean_urls(input_text: str) -> str:
 
 
 def remove_urls(input_text: str) -> str:
-    """Remove URLs from [title](url) format, keep [title] (from original extract.py)."""
+    """Remove URLs from [title](url) format, keep [title]."""
     # match [title](url) format, only remove the content in the parentheses, keep [title]
     pattern = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
     # replace [title](url) with [title]
@@ -134,7 +132,7 @@ def remove_urls(input_text: str) -> str:
 
 
 def clean_escape(input_text: str) -> str:
-    """Clean illegal escape characters (from original extract.py)."""
+    """Clean illegal escape characters."""
     input_text = input_text.replace("\\>", ">")
     input_text = input_text.replace("\\<", "<")
     input_text = input_text.replace("\\+", "+")
@@ -147,7 +145,6 @@ async def extract_citations(
 ) -> List[Dict[str, Any]] | Dict[str, str]:
     """
     Extract citations from research article using FACT evaluator LLM.
-    Following original extract.py implementation.
 
     Args:
         raw_article: The generated research article
@@ -161,11 +158,11 @@ async def extract_citations(
     try:
         fact_evaluator = FACTEvaluatorLLM()
     except Exception as e:
-        return {"error": f"Failed to initialize FACT evaluator: {str(e)}"}
+        return {"error": f"Failed to initialize evaluator: {str(e)}"}
 
     user_prompt = get_extract_citations_prompt(language).format(report_text=raw_article)
 
-    # Extract citations with retry logic (following original implementation)
+    # Extract citations with retry logic
     max_retries = 3
 
     for retry in range(max_retries):
@@ -177,13 +174,13 @@ async def extract_citations(
             if not response:
                 continue
 
-            # Clean response and parse JSON (following original logic)
+            # Clean response and parse JSON
             response = response.replace("```json", "").replace("```", "")
             response = clean_escape(response)
 
             citations = json.loads(response)
 
-            # Clean URLs from facts (following original implementation)
+            # Clean URLs from facts
             for citation in citations:
                 if "fact" in citation:
                     citation["fact"] = remove_urls(citation["fact"])
@@ -207,7 +204,6 @@ async def deduplicate_citations(
 ) -> Dict[str, Dict[str, Any]] | Dict[str, str]:
     """
     Deduplicate citations by URL using FACT evaluator LLM.
-    Following original deduplicate.py implementation.
 
     Args:
         citations: List of citation dictionaries from extract_citations
@@ -223,9 +219,7 @@ async def deduplicate_citations(
     try:
         fact_evaluator = FACTEvaluatorLLM()
     except Exception as e:
-        return {
-            "error": f"Failed to initialize FACT evaluator for deduplication: {str(e)}"
-        }
+        return {"error": f"Failed to initialize evaluator for deduplication: {str(e)}"}
 
     # Group citations by URL
     citation_groups: Dict[str, List[Dict[str, Any]]] = {}
@@ -277,7 +271,7 @@ async def deduplicate_citations(
                     deduped_idx = [i + 1 for i in range(len(group))]
                 await asyncio.sleep(1)
 
-        # Validate deduped_idx (following original validation logic)
+        # Validate deduped_idx
         if not deduped_idx or 0 in deduped_idx or len(deduped_idx) > len(group):
             deduped_idx = [i + 1 for i in range(len(group))]
 
@@ -297,7 +291,6 @@ async def scrape_citations(
 ) -> Dict[str, Dict[str, Any]]:
     """
     Scrape URL content for citation groups using Jina web scraper.
-    Following original scrape.py implementation.
 
     Args:
         citations_groups_deduped: Dictionary from deduplicate_citations
@@ -322,7 +315,7 @@ async def scrape_citations(
         if citation_data.get("url_content") is not None:
             continue  # Already scraped
 
-        # Scrape with retry logic (following original implementation)
+        # Scrape with retry logic
         max_retries = 3
         for retry in range(max_retries):
             try:
@@ -338,7 +331,7 @@ async def scrape_citations(
                             f"scrape failed: {result.get('error', 'unknown error')}"
                         )
                 else:
-                    # Success - combine title, description, and content (following original logic)
+                    # Success - combine title, description, and content
                     title = result.get("title", "")
                     description = result.get("description", "")
                     content = result.get("content", "")
@@ -364,7 +357,6 @@ async def validate_citations(
 ) -> Dict[str, Dict[str, Any]]:
     """
     Validate citations against their scraped content using FACT evaluator LLM.
-    Following original validate.py implementation.
 
     Args:
         citations_groups_scraped: Dictionary from scrape_citations with url_content populated
@@ -384,7 +376,7 @@ async def validate_citations(
         for citation_data in citations_groups_scraped.values():
             citation_data["validate_res"] = []
             citation_data["validate_error"] = (
-                f"Failed to initialize FACT evaluator: {str(e)}"
+                f"Failed to initialize evaluator: {str(e)}"
             )
         return citations_groups_scraped
 
@@ -399,7 +391,7 @@ async def validate_citations(
             citation_data["validate_error"] = "no reference content or facts"
             continue
 
-        # Format facts for validation prompt (following original implementation)
+        # Format facts for validation prompt
         facts_str = "\n".join([f"{i + 1}. {fact}" for i, fact in enumerate(facts)])
 
         user_prompt = get_validate_citations_prompt(language).format(
@@ -457,7 +449,6 @@ def calculate_fact_statistics(
 ) -> Dict[str, float]:
     """
     Calculate FACT statistics from validated citation groups.
-    Following original stat.py implementation.
 
     Args:
         citations_groups_validated: Dictionary from validate_citations with validation results
@@ -471,7 +462,7 @@ def calculate_fact_statistics(
     if not citations_groups_validated:
         return {"total_citations": 0, "valid_citations": 0, "valid_rate": 0.0}
 
-    # Count citations and valid citations (following original logic)
+    # Count citations and valid citations
     for citation_data in citations_groups_validated.values():
         validate_error = citation_data.get("validate_error")
         validate_res = citation_data.get("validate_res", [])
@@ -480,7 +471,7 @@ def calculate_fact_statistics(
         if validate_error is not None:
             continue
 
-        # Count each validation result (following original implementation)
+        # Count each validation result
         for val_item in validate_res:
             result = val_item.get("result")
             if result != "unknown":  # Only count non-unknown results
@@ -505,7 +496,7 @@ async def run_fact_evaluation(
     raw_article: str, state: TaskState, generate: Generate
 ) -> Dict[str, Any]:
     """
-    Run the complete FACT evaluation pipeline following DeepResearch Bench.
+    Run the complete FACT evaluation pipeline.
 
     Pipeline: extract citations -> deduplicate -> scrape URLs -> validate -> calculate stats
 
@@ -556,7 +547,6 @@ async def run_fact_evaluation(
             }
 
         # Phase 3: Scrape URLs
-        # At this point, citations_deduped is guaranteed to be Dict[str, Dict[str, Any]] due to error check above
         citations_scraped = await scrape_citations(citations_deduped)  # type: ignore[arg-type]
 
         # Phase 4: Validate citations against scraped content

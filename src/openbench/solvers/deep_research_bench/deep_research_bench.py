@@ -94,27 +94,10 @@ def extract_citations_from_state(
     if hasattr(state.output, "metadata") and state.output.metadata:
         metadata = state.output.metadata
 
-        # Debug logging to verify structure
-        with open("/tmp/citation_debug.txt", "a") as debug_file:
-            debug_file.write(
-                "\n=== Citation Debug - Metadata executed_tools Method ===\n"
-            )
-            debug_file.write(
-                f"Metadata keys: {list(metadata.keys()) if isinstance(metadata, dict) else 'Not a dict'}\n"
-            )
-            debug_file.write(
-                f"Has executed_tools: {'executed_tools' in metadata if isinstance(metadata, dict) else False}\n"
-            )
-
         # Check for executed_tools in metadata (Groq format)
         if "executed_tools" in metadata and isinstance(
             metadata["executed_tools"], list
         ):
-            with open("/tmp/citation_debug.txt", "a") as debug_file:
-                debug_file.write(
-                    f"executed_tools length: {len(metadata['executed_tools'])}\n"
-                )
-
             for i, tool in enumerate(metadata["executed_tools"]):
                 # Create a truncated version for logging
                 tool_for_logging = tool.copy() if isinstance(tool, dict) else tool
@@ -133,39 +116,19 @@ def extract_citations_from_state(
                             sr_copy.append(result)
                     tool_for_logging["search_results"] = sr_copy
 
-                with open("/tmp/citation_debug.txt", "a") as debug_file:
-                    debug_file.write(f"Tool {i}: {tool_for_logging}\n")
-
                 if isinstance(tool, dict) and "search_results" in tool:
                     search_results = tool["search_results"]
-                    with open("/tmp/citation_debug.txt", "a") as debug_file:
-                        debug_file.write(
-                            f"  Found search_results: {type(search_results)}\n"
-                        )
-
                     # Handle Groq's search_results structure: {'results': [...], 'images': ...}
                     results_list = None
                     if isinstance(search_results, dict) and "results" in search_results:
                         results_list = search_results["results"]
-                        with open("/tmp/citation_debug.txt", "a") as debug_file:
-                            debug_file.write(
-                                f"  Found results list with {len(results_list)} items\n"
-                            )
                     elif isinstance(search_results, list):
                         # Fallback for direct list format
                         results_list = search_results
-                        with open("/tmp/citation_debug.txt", "a") as debug_file:
-                            debug_file.write(
-                                f"  Direct list with {len(results_list)} items\n"
-                            )
 
                     if results_list and isinstance(results_list, list):
                         for result in results_list:
                             if isinstance(result, dict) and "url" in result:
-                                with open("/tmp/citation_debug.txt", "a") as debug_file:
-                                    debug_file.write(
-                                        f"    Extracting: {result.get('title', 'No title')} -> {result['url']}\n"
-                                    )
                                 citations.append(result["url"])
                                 if "title" in result:
                                     annotations.append(
@@ -199,15 +162,6 @@ def extract_citations_from_state(
         if url and url not in seen_urls:
             unique_annotations.append(annotation)
             seen_urls.add(url)
-
-    # Debug: Log what we're returning
-    with open("/tmp/citation_debug.txt", "a") as debug_file:
-        debug_file.write("\n=== FINAL EXTRACTION RESULTS ===\n")
-        debug_file.write(f"Unique citations count: {len(unique_citations)}\n")
-        debug_file.write(f"Unique citations: {unique_citations}\n")
-        debug_file.write(f"Unique annotations count: {len(unique_annotations)}\n")
-        debug_file.write(f"Unique annotations: {unique_annotations}\n")
-        debug_file.write("=== END EXTRACTION RESULTS ===\n")
 
     return unique_citations, unique_annotations
 
@@ -277,31 +231,10 @@ def deep_research_solver():
                 state, research_article
             )
 
-            # Debug: Log what we received from extraction
-            with open("/tmp/citation_debug.txt", "a") as debug_file:
-                debug_file.write("\n=== CALLING CODE DEBUG ===\n")
-                debug_file.write(f"Received citations: {citations}\n")
-                debug_file.write(f"Received annotations: {annotations}\n")
-                debug_file.write(
-                    f"Citations or annotations exist: {bool(citations or annotations)}\n"
-                )
-
             # Append citations to research article if found
             if citations or annotations:
                 citation_section = format_citation_section(citations, annotations)
-                with open("/tmp/citation_debug.txt", "a") as debug_file:
-                    debug_file.write(
-                        f"Generated citation section:\n{citation_section}\n"
-                    )
-                    debug_file.write(
-                        f"Research article length before: {len(research_article)}\n"
-                    )
                 research_article += citation_section
-                with open("/tmp/citation_debug.txt", "a") as debug_file:
-                    debug_file.write(
-                        f"Research article length after: {len(research_article)}\n"
-                    )
-                    debug_file.write("=== END CALLING CODE DEBUG ===\n")
 
             # Validate article generation
             if not research_article:

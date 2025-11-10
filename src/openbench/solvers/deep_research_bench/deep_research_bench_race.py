@@ -1,6 +1,6 @@
 """
 RACE evaluation module for DeepResearch Bench.
-Handles article quality evaluation.
+Handles article quality evaluation, evaluated on comprehensiveness, insight, instruction-following, and readability.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from openbench.utils.deep_research_bench_prompts import (
 
 
 class RACEEvaluatorLLM:
-    """Hardcoded Gemini evaluator LLM for RACE evaluation (following original implementation)."""
+    """Gemini evaluator LLM for RACE evaluation."""
 
     def __init__(self):
         self.api_key = os.environ.get("GEMINI_API_KEY")
@@ -36,11 +36,11 @@ class RACEEvaluatorLLM:
         self.client = genai.Client(
             api_key=self.api_key, http_options={"timeout": 600000}
         )
-        self.model = "gemini-2.5-pro-preview-06-05"  # Same as original Model
+        self.model = "gemini-2.5-pro-preview-06-05"  # Same as original model
 
     async def generate(self, user_prompt: str, system_prompt: str = "") -> str:
-        """Generate text response using hardcoded Gemini model."""
-        # Build request content (following original implementation)
+        """Generate text response using Gemini model."""
+        # Build request content
         contents = []
 
         # Add system prompt if provided
@@ -62,9 +62,7 @@ class RACEEvaluatorLLM:
             return response.text
 
         except Exception as e:
-            raise Exception(
-                f"Failed to generate content with hardcoded evaluator: {str(e)}"
-            )
+            raise Exception(f"Failed to generate content with evaluator: {str(e)}")
 
 
 def extract_json_from_markdown(text):
@@ -242,7 +240,7 @@ def extract_json_from_markdown(text):
 
 def calculate_weighted_scores(llm_output_json, criteria_data, language="en"):
     """
-    Calculates weighted scores based on LLM output and criteria weights (following original implementation).
+    Calculates weighted scores based on LLM output and criteria weights.
 
     Args:
         llm_output_json: JSON output from LLM with scoring data
@@ -585,7 +583,7 @@ async def run_race_evaluation(
     try:
         race_evaluator = RACEEvaluatorLLM()
     except Exception as e:
-        return {"error": f"Failed to initialize hardcoded evaluator: {str(e)}"}
+        return {"error": f"Failed to initialize evaluator: {str(e)}"}
 
     # Step 1: Clean article by removing citations (needed for RACE evaluation)
     cleaned_article = await clean_article(raw_article, language, generate, state)
@@ -659,7 +657,7 @@ async def run_race_evaluation(
 
     while retry_count < max_retries and not success:
         try:
-            # Call hardcoded evaluator LLM
+            # Call evaluator LLM
             llm_response_str = await race_evaluator.generate(user_prompt)
 
             # Phase 2E: Parse JSON response and validate dimensions
