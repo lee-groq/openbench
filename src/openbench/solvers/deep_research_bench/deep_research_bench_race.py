@@ -12,8 +12,8 @@ import os
 from typing import Any, Dict, Optional
 from inspect_ai.solver import TaskState, Generate
 from inspect_ai.model import ChatMessageUser
-from google import genai
-from google.genai import types
+from google import genai  # type: ignore[import-not-found]
+from google.genai import types  # type: ignore[import-not-found]
 
 from openbench.datasets.deep_research_bench import get_criteria, get_reference_clean
 from openbench.utils.deep_research_bench_prompts import (

@@ -11,8 +11,8 @@ import re
 import os
 from typing import Any, Dict, List
 from inspect_ai.solver import TaskState, Generate
-from google import genai
-from google.genai import types
+from google import genai  # type: ignore[import-not-found]
+from google.genai import types  # type: ignore[import-not-found]
 import requests
 
 from openbench.utils.deep_research_bench_prompts import (
